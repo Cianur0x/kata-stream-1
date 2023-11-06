@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class Exercise1Test extends PetDomainForKata
 {
@@ -18,7 +19,7 @@ public class Exercise1Test extends PetDomainForKata
     {
         //TODO
         // Replace empty list firstNames with a stream transformation on people.
-        List<String> firstNames = new ArrayList<>(); // this.people...
+        List<String> firstNames =this.people.stream().map(person -> person.getFirstName()).toList(); // this.people...
 
         var expectedFirstNames = Arrays.asList("Mary", "Bob", "Ted", "Jake", "Barry", "Terry", "Harry", "John");
         Assertions.assertIterableEquals(expectedFirstNames, firstNames);
@@ -35,11 +36,11 @@ public class Exercise1Test extends PetDomainForKata
 
             //TODO
             // Replace empty list name with a stream transformation on pets.
-            names = new ArrayList<>() ;
+            names = pets.stream().map(pet -> pet.getName()).toList();
 
         }
 
-        Assertions.assertEquals("Tabby", ""); //TODO
+        Assertions.assertEquals("Tabby", String.join("", names)); //TODO
     }
 
     @Test
@@ -49,11 +50,13 @@ public class Exercise1Test extends PetDomainForKata
     {
         //TODO
         // Replace empty list with a positive filtering stream on people
-        List<Person> peopleWithCats = new ArrayList<>();  // this.people...
+        List<Person> peopleWithCats = this.people.stream()
+                .filter(person -> person.hasPet(PetType.CAT))
+                .toList();  // this.people...
 
         var expectedFirstNames = Arrays.asList("Smith", "Smith");
 
-        Assertions.assertEquals(expectedFirstNames, peopleWithCats);
+        Assertions.assertEquals(expectedFirstNames, peopleWithCats.stream().map(person -> person.getLastName()).toList());
     }
 
     @Test
@@ -63,9 +66,11 @@ public class Exercise1Test extends PetDomainForKata
     {
         //TODO
         // Replace empty list with a negative filtering stream on people
-        List<Person> peopleWithoutCats = new ArrayList<>();  // this.people...
+        List<Person> peopleWithoutCats = this.people.stream()
+                .filter(person -> !person.hasPet(PetType.CAT))
+                .toList();  // this.people...
 
         var expectedFirstNames = Arrays.asList("Smith", "Snake", "Bird", "Turtle", "Hamster", "Doe");
-        Assertions.assertIterableEquals(expectedFirstNames, peopleWithoutCats);
+        Assertions.assertIterableEquals(expectedFirstNames, peopleWithoutCats.stream().map(person -> person.getLastName()).toList());
     }
 }
