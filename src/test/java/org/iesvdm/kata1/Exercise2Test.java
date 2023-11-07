@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class Exercise2Test extends PetDomainForKata
 {
@@ -18,11 +19,11 @@ public class Exercise2Test extends PetDomainForKata
     {
         //TODO
         // replace null with a Predicate lambda which checks for PetType.CAT
-        Predicate<Person> predicate = p -> false;
+        Predicate<Person> predicate = p -> p.hasPet(PetType.CAT);
 
         //TODO
         // replace false by a check in a stream of people
-        Assertions.assertTrue(false);
+        Assertions.assertTrue(people.stream().filter(predicate).findAny().isPresent());
     }
 
     @Test
@@ -33,7 +34,7 @@ public class Exercise2Test extends PetDomainForKata
         Predicate<Person> predicate = Person::isPetPerson;
         //TODO
         // replace with a method call send to people that checks if all people have pets
-        boolean result = true;
+        boolean result = people.size() == people.stream().filter(predicate).toList().size();
 
         Assertions.assertFalse(result);
     }
@@ -45,7 +46,7 @@ public class Exercise2Test extends PetDomainForKata
     {
         //TODO
         // replace with a method call send to this.people that checks how many people have cats
-        int count = 0;
+        int count = people.stream().filter(person -> person.hasPet(PetType.CAT)).toList().size();
 
         Assertions.assertEquals(2, count);
     }
@@ -56,7 +57,7 @@ public class Exercise2Test extends PetDomainForKata
     {
         //TODO
         // replace with a stream on people to obtain Mary Smith
-        Person result = new Person("", "");
+        Person result = people.stream().filter(person -> person.getFullName().equals("Mary Smith")).findFirst().get();
 
         Assertions.assertEquals("Mary", result.getFirstName());
         Assertions.assertEquals("Smith", result.getLastName());
@@ -69,7 +70,7 @@ public class Exercise2Test extends PetDomainForKata
     {
         //TODO
         // transform this into a list of pets from people
-        List<Pet> petList = new ArrayList<>();
+        // List<Pet> petList = people.stream();
 
         //TODO
         // obtain serpySnake pet from petList
