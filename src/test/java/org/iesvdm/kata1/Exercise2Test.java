@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Exercise2Test extends PetDomainForKata
 {
@@ -70,11 +71,16 @@ public class Exercise2Test extends PetDomainForKata
     {
         //TODO
         // transform this into a list of pets from people
-        // List<Pet> petList = people.stream();
+         List<Pet> petList = people.stream()
+                 .map(person -> person.getPets())
+                 .reduce((pets, pets2) -> {
+                     List<Pet> newList = Stream.concat(pets.stream(), pets2.stream()).toList();
+                     return newList;
+                 }).get();
 
         //TODO
         // obtain serpySnake pet from petList
-        Pet serpySnake = new Pet(PetType.BIRD,"", 0);
+        Pet serpySnake = petList.stream().filter(pet -> pet.getName().equals("Serpy")).findAny().get();
 
         Assertions.assertEquals("🐍",serpySnake.getType().toString());
     }
@@ -85,7 +91,7 @@ public class Exercise2Test extends PetDomainForKata
     {
         //TODO
         // replace with only the pet owners
-        List<Person> petPeople = new ArrayList<>();
+        List<Person> petPeople = this.people.stream().filter(person -> person.isPetPerson()).toList();
 
         Assertions.assertEquals(7, petPeople.size());
     }
@@ -98,7 +104,14 @@ public class Exercise2Test extends PetDomainForKata
 
         //TODO
         // use the previous function to obtain the set of pet types
-        Set<PetType> petTypes = new HashSet<>();
+
+        // Utiliza la función para obtener el conjunto de tipos de mascotas
+        Set<PetType> petTypes = this.people.stream()
+                .map(function)
+                // Aplica la función directamente
+                .flatMap(map -> map.keySet().stream())
+                // Convierte los conjuntos de claves en un solo flujo
+                .collect(Collectors.toSet());
 
         var expectedSet = Set.of(PetType.CAT, PetType.DOG, PetType.TURTLE, PetType.HAMSTER, PetType.BIRD, PetType.SNAKE);
         Assertions.assertEquals(expectedSet, petTypes);
@@ -112,7 +125,13 @@ public class Exercise2Test extends PetDomainForKata
 
         //TODO
         // use the previous function to obtain the set of emojis
-        Set<String> petEmojis = new HashSet<>();
+        Set<String> petEmojis = this.people.stream()
+                .map(function)
+                // Aplica la función directamente
+                .flatMap(map -> map.keySet().stream())
+                .peek(s -> System.out.println(s))
+                // Convierte los conjuntos de claves en un solo flujo
+                .collect(Collectors.toSet());
 
         var expected = Set.of("🐱", "🐶", "🐢", "🐹", "🐦", "🐍");
         Assertions.assertEquals(expected, petEmojis);
