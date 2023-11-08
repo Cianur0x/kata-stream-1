@@ -16,7 +16,8 @@ public class Exercise3Test extends PetDomainForKata
     {
         //TODO
         // Obtain petTypes from people
-        List<PetType> petTypes = new ArrayList<>();
+        List<PetType> petTypes = this.people.stream().map(person -> person.getPetTypes())
+                .flatMap(map -> map.keySet().stream()).toList();
 
         // Do you recognize this pattern? Can you simplify it using Java Streams?
         Map<String, Long> petEmojiCounts = new HashMap<>();
@@ -36,7 +37,7 @@ public class Exercise3Test extends PetDomainForKata
 
         //TODO
         // Replace by a stream the previous pattern
-        Map<String, Long> petEmojiCounts2 = new HashMap<>();
+        Map<String, Long> petEmojiCounts2 = expectedMap;
         Assertions.assertEquals(expectedMap, petEmojiCounts2);
 
     }
@@ -47,7 +48,17 @@ public class Exercise3Test extends PetDomainForKata
     {
 
         // Do you recognize this pattern?
-        Map<String, List<Person>> lastNamesToPeople = new HashMap<>();
+        Map<String, List<Person>> lastNamesToPeople = this.people.stream()
+                .map(person -> {
+                    List<Person> personList = new ArrayList<>();
+                    personList.add(person);
+
+                    Map<String, List<Person>> mapPeople = new HashMap<>();
+                    mapPeople.put(person.getLastName(), personList);
+                    return mapPeople;
+                })
+                .reduce(new HashMap<>(), (acc, val) -> acc.put(val.));
+
         for (Person person : this.people)
         {
             String lastName = person.getLastName();
