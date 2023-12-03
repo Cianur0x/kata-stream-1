@@ -6,18 +6,15 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-public class Exercise2Test extends PetDomainForKata
-{
+public class Exercise2Test extends PetDomainForKata {
     @Test
     @Tag("KATA")
     @DisplayName("doAnyPeopleHaveCats 🐱?")
-    public void doAnyPeopleHaveCats()
-    {
+    public void doAnyPeopleHaveCats() {
         //TODO
         // replace null with a Predicate lambda which checks for PetType.CAT
         Predicate<Person> predicate = p -> p.hasPet(PetType.CAT);
@@ -25,17 +22,17 @@ public class Exercise2Test extends PetDomainForKata
         //TODO
         // replace false by a check in a stream of people
         Assertions.assertTrue(people.stream().filter(predicate).findAny().isPresent());
+        Assertions.assertTrue(this.people.stream().anyMatch(predicate)); // Uso correcto de anyMatch
     }
 
     @Test
     @Tag("KATA")
-    public void doAllPeopleHavePets()
-    {
+    public void doAllPeopleHavePets() {
 
         Predicate<Person> predicate = Person::isPetPerson;
         //TODO
         // replace with a method call send to people that checks if all people have pets
-        boolean result = people.size() == people.stream().filter(predicate).toList().size();
+        boolean result = this.people.stream().allMatch(predicate);
 
         Assertions.assertFalse(result);
     }
@@ -43,23 +40,21 @@ public class Exercise2Test extends PetDomainForKata
     @Test
     @Tag("KATA")
     @DisplayName("howManyPeopleHaveCats 🐱?")
-    public void howManyPeopleHaveCats()
-    {
+    public void howManyPeopleHaveCats() {
         //TODO
         // replace with a method call send to this.people that checks how many people have cats
-        int count = people.stream().filter(person -> person.hasPet(PetType.CAT)).toList().size();
+        int count = this.people.stream().filter(person -> person.hasPet(PetType.CAT)).toList().size();
 
         Assertions.assertEquals(2, count);
     }
 
     @Test
     @Tag("KATA")
-    public void findMarySmith()
-    {
+    public void findMarySmith() {
         //TODO
         // replace with a stream on people to obtain Mary Smith
-        Person result = people.stream().filter(person -> person.getFullName().equals("Mary Smith")).findFirst().get();
-
+        Person result = this.people.stream().filter(person -> person.named("Mary Smith")).findAny().orElse(new Person("", ""));
+        // utilizo el orElse para que me devuelva el valor si esta presente si no devuelve una persona con parametros vacios
         Assertions.assertEquals("Mary", result.getFirstName());
         Assertions.assertEquals("Smith", result.getLastName());
     }
@@ -67,39 +62,44 @@ public class Exercise2Test extends PetDomainForKata
     @Test
     @Tag("KATA")
     @DisplayName("findPetNamedSerpy 🐍")
-    public void findPetNamedSerpy()
-    {
+    public void findPetNamedSerpy() {
         //TODO
         // transform this into a list of pets from people
-         List<Pet> petList = people.stream()
-                 .map(person -> person.getPets())
-                 .reduce((pets, pets2) -> {
-                     List<Pet> newList = Stream.concat(pets.stream(), pets2.stream()).toList();
-                     return newList;
-                 }).get();
+
+//        List<Pet> petList = this.people.stream().map(Person::getPets).reduce((pets, pets2) -> {
+//            return Stream.concat(pets.stream(), pets2.stream()).toList(); // utilizo el reduce para transformarlo en algo nuevo,
+//        }).orElse(new ArrayList<>()); // utilizo el orElse para que me devuelva el valor si esta presente si no devuelve un array vacio
+
+        List<Pet> petList = people.stream()
+                .map(Person::getPets)
+                .flatMap(Collection::stream)
+                .distinct().toList();
+
 
         //TODO
         // obtain serpySnake pet from petList
-        Pet serpySnake = petList.stream().filter(pet -> pet.getName().equals("Serpy")).findAny().get();
+        Pet serpySnake = petList.stream()
+                .filter(pet -> pet.getName().equals("Serpy") && pet.getType().equals(PetType.SNAKE))
+                .findFirst()
+                .orElse(new Pet(PetType.BIRD, "", 0));
 
-        Assertions.assertEquals("🐍",serpySnake.getType().toString());
+        Assertions.assertEquals("🐍", serpySnake.getType().toString());
     }
 
     @Test
     @Tag("KATA")
-    public void getPeopleWithPets()
-    {
+    public void getPeopleWithPets() {
         //TODO
         // replace with only the pet owners
-        List<Person> petPeople = this.people.stream().filter(person -> person.isPetPerson()).toList();
+        List<Person> petPeople = this.people.stream()
+                .filter(Person::isPetPerson).toList();
 
         Assertions.assertEquals(7, petPeople.size());
     }
 
     @Test
     @Tag("KATA")
-    public void getAllPetTypesOfAllPeople()
-    {
+    public void getAllPetTypesOfAllPeople() {
         Function<Person, Map<PetType, Long>> function = Person::getPetTypes;
 
         //TODO
@@ -119,8 +119,7 @@ public class Exercise2Test extends PetDomainForKata
 
     @Test
     @Tag("KATA")
-    public void getAllPetEmojisOfAllPeople()
-    {
+    public void getAllPetEmojisOfAllPeople() {
         Function<Person, Map<String, Long>> function = Person::getPetEmojis;
 
         //TODO
@@ -129,7 +128,6 @@ public class Exercise2Test extends PetDomainForKata
                 .map(function)
                 // Aplica la función directamente
                 .flatMap(map -> map.keySet().stream())
-                .peek(s -> System.out.println(s))
                 // Convierte los conjuntos de claves en un solo flujo
                 .collect(Collectors.toSet());
 
@@ -139,13 +137,10 @@ public class Exercise2Test extends PetDomainForKata
 
     @Test
     @Tag("KATA")
-    public void getFirstNamesOfAllPeople()
-    {
+    public void getFirstNamesOfAllPeople() {
         //TODO
         // transform this.people into a list of first names
-        List<String> firstNames = this.people.stream()
-                .map(person -> person.getFirstName())
-                .toList();
+        List<String> firstNames = this.people.stream().map(Person::getFirstName).toList();
 
         var expectedList = List.of("Mary", "Bob", "Ted", "Jake", "Barry", "Terry", "Harry", "John");
         Assertions.assertEquals(expectedList, firstNames);
@@ -154,8 +149,7 @@ public class Exercise2Test extends PetDomainForKata
     @Test
     @Tag("KATA")
     @DisplayName("doAnyPeopleHaveCatsRefactor 🐱?")
-    public void doAnyPeopleHaveCatsRefactor()
-    {
+    public void doAnyPeopleHaveCatsRefactor() {
         //TODO
         // test with a stream on people, if anyone has a cat at least
         boolean peopleHaveCatsLambda = this.people.stream().anyMatch(person -> person.hasPet(PetType.CAT));
@@ -166,19 +160,17 @@ public class Exercise2Test extends PetDomainForKata
     @Test
     @Tag("KATA")
     @DisplayName("doAllPeopleHaveCatsRefactor 🐱?")
-    public void doAllPeopleHaveCatsRefactor()
-    {
+    public void doAllPeopleHaveCatsRefactor() {
         //TODO
         // test if all the people have cats
-        boolean peopleHaveCats =  this.people.stream().allMatch(person -> person.hasPet(PetType.CAT));
+        boolean peopleHaveCats = this.people.stream().allMatch(p -> p.hasPet(PetType.CAT));
         Assertions.assertFalse(peopleHaveCats);
     }
 
     @Test
     @Tag("KATA")
     @DisplayName("getPeopleWithCatsRefactor 🐱?")
-    public void getPeopleWithCatsRefactor()
-    {
+    public void getPeopleWithCatsRefactor() {
         //TODO
         // obtain persons with cats
         List<Person> peopleWithCats = this.people.stream().filter(person -> person.hasPet(PetType.CAT)).toList();
@@ -188,11 +180,10 @@ public class Exercise2Test extends PetDomainForKata
     @Test
     @Tag("KATA")
     @DisplayName("getPeopleWithoutCatsRefactor 🐱?")
-    public void getPeopleWithoutCatsRefactor()
-    {
+    public void getPeopleWithoutCatsRefactor() {
         //TODO
         // obtain persons without cats
-        List<Person> peopleWithoutCats = this.people.stream().filter(person -> !person.hasPet(PetType.CAT)).toList();
+        List<Person> peopleWithoutCats =this.people.stream().filter(person -> !person.hasPet(PetType.CAT)).toList();
         Assertions.assertEquals(6, peopleWithoutCats.size());
     }
 }
