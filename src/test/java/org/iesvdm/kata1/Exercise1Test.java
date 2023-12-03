@@ -50,7 +50,7 @@ public class Exercise1Test extends PetDomainForKata {
 
         var expectedFirstNames = Arrays.asList("Smith", "Smith");
 
-        Assertions.assertEquals(expectedFirstNames, peopleWithCats.stream().map(Person::getFirstName).toList());
+        Assertions.assertEquals(expectedFirstNames, peopleWithCats.stream().map(Person::getLastName).toList());
     }
 
     @Test
